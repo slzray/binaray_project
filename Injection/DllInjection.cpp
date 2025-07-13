@@ -1,7 +1,8 @@
-#include "DllInjection.hpp"
+﻿#include "DllInjection.hpp"
 #include <TlHelp32.h>
 #include <iostream>
 #include <fstream>
+#include <string>
 
 DllInjector::DllInjector() 
     : m_targetProcessId(0)
@@ -697,4 +698,124 @@ bool ThreadHijacker::SetThreadContext(DWORD threadId, const CONTEXT& context) {
 
 LPVOID ThreadHijacker::AllocateMemoryInProcess(HANDLE hProcess, SIZE_T size) {
     return VirtualAllocEx(hProcess, nullptr, size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+}
+
+// 获取目标进程中的模块列表
+std::vector<std::string> DllInjector::GetModuleList() {
+    std::vector<std::string> moduleList;
+
+    if (!m_targetProcess || m_targetProcessId == 0) {
+        std::cout << "Error: No target process set" << std::endl;
+        return moduleList;
+    }
+
+    // 创建模块快照
+    HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, m_targetProcessId);
+    if (snapshot == INVALID_HANDLE_VALUE) {
+        DWORD error = GetLastError();
+        std::cout << "Failed to create module snapshot. Error: " << error << std::endl;
+
+        // 如果是权限问题，尝试只使用TH32CS_SNAPMODULE
+        snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, m_targetProcessId);
+        if (snapshot == INVALID_HANDLE_VALUE) {
+            std::cout << "Failed to create module snapshot (second attempt). Error: " << GetLastError() << std::endl;
+            return moduleList;
+        }
+    }
+
+    MODULEENTRY32 moduleEntry;
+    moduleEntry.dwSize = sizeof(MODULEENTRY32);
+
+    // 遍历模块列表
+    if (Module32First(snapshot, &moduleEntry)) {
+        do {
+            // 将宽字符模块名转换为多字节字符串
+            char moduleName[MAX_PATH];
+            int result = WideCharToMultiByte(CP_UTF8, 0, moduleEntry.szModule, -1,
+                                           moduleName, MAX_PATH, nullptr, nullptr);
+
+            if (result > 0) {
+                std::string moduleInfo = std::string(moduleName);
+
+                // 添加模块路径信息（如果可用）
+                char modulePath[MAX_PATH];
+                result = WideCharToMultiByte(CP_UTF8, 0, moduleEntry.szExePath, -1,
+                                           modulePath, MAX_PATH, nullptr, nullptr);
+
+                if (result > 0) {
+                    moduleInfo += " (" + std::string(modulePath) + ")";
+                }
+
+                // 添加基地址和大小信息
+                moduleInfo += " [Base: 0x" + std::to_string(reinterpret_cast<uintptr_t>(moduleEntry.modBaseAddr)) +
+                             ", Size: " + std::to_string(moduleEntry.modBaseSize) + "]";
+
+                moduleList.push_back(moduleInfo);
+            }
+        } while (Module32Next(snapshot, &moduleEntry));
+    } else {
+        std::cout << "Failed to enumerate modules. Error: " << GetLastError() << std::endl;
+    }
+
+    CloseHandle(snapshot);
+
+    std::cout << "Found " << moduleList.size() << " modules in target process (PID: " << m_targetProcessId << ")" << std::endl;
+
+    return moduleList;
+}
+
+// 获取远程进程中函数的地址
+FARPROC DllInjector::GetRemoteProcAddress(HMODULE hModule, const std::string& procName) {
+    if (!hModule || !m_targetProcess) {
+        return nullptr;
+    }
+
+    // 在当前进程中获取同名模块
+    HMODULE localModule = nullptr;
+
+    // 首先尝试通过模块名获取本地模块句柄
+    HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, m_targetProcessId);
+    if (snapshot != INVALID_HANDLE_VALUE) {
+        MODULEENTRY32 moduleEntry;
+        moduleEntry.dwSize = sizeof(MODULEENTRY32);
+
+        if (Module32First(snapshot, &moduleEntry)) {
+            do {
+                if (moduleEntry.hModule == hModule) {
+                    // 将宽字符转换为多字节字符
+                    char moduleName[MAX_PATH];
+                    WideCharToMultiByte(CP_UTF8, 0, moduleEntry.szModule, -1, moduleName, MAX_PATH, nullptr, nullptr);
+                    localModule = GetModuleHandleA(moduleName);
+                    break;
+                }
+            } while (Module32Next(snapshot, &moduleEntry));
+        }
+
+        CloseHandle(snapshot);
+    }
+
+    if (!localModule) {
+        std::cout << "Failed to find local module corresponding to remote module" << std::endl;
+        return nullptr;
+    }
+
+    // 获取本地函数地址
+    FARPROC localProcAddress = GetProcAddress(localModule, procName.c_str());
+    if (!localProcAddress) {
+        std::cout << "Failed to find function '" << procName << "' in local module" << std::endl;
+        return nullptr;
+    }
+
+    // 计算偏移量
+    DWORD_PTR localBase = reinterpret_cast<DWORD_PTR>(localModule);
+    DWORD_PTR remoteBase = reinterpret_cast<DWORD_PTR>(hModule);
+    DWORD_PTR offset = reinterpret_cast<DWORD_PTR>(localProcAddress) - localBase;
+
+    // 返回远程地址
+    FARPROC remoteProcAddress = reinterpret_cast<FARPROC>(remoteBase + offset);
+
+    std::cout << "Function '" << procName << "' found at remote address: 0x"
+              << std::hex << remoteProcAddress << std::dec << std::endl;
+
+    return remoteProcAddress;
 }

@@ -1,4 +1,4 @@
-#include "../Hook/InlineHook.hpp"
+﻿#include "../Hook/InlineHook.hpp"
 #include "../Hook/ApiHook.hpp"
 #include <iostream>
 #include <Windows.h>

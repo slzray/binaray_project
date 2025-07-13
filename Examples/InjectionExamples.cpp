@@ -1,4 +1,4 @@
-#include "../Injection/DllInjection.hpp"
+﻿#include "../Injection/DllInjection.hpp"
 #include <iostream>
 #include <Windows.h>
 #include <TlHelp32.h>
@@ -90,9 +90,9 @@ void DemonstrateInjectionMethods() {
         std::cout << "Testing " << method.second << "..." << std::endl;
         
         if (injector.InjectDll(dllPath, method.first)) {
-            std::cout << "  ✓ " << method.second << " succeeded!" << std::endl;
+            std::cout << "  √ " << method.second << " succeeded!" << std::endl;
         } else {
-            std::cout << "  ✗ " << method.second << " failed!" << std::endl;
+            std::cout << "  × " << method.second << " failed!" << std::endl;
         }
     }
 }

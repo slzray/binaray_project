@@ -1,4 +1,4 @@
-#include "InlineHook.hpp"
+﻿#include "InlineHook.hpp"
 #include <iostream>
 
 InlineHook64::InlineHook64() 
