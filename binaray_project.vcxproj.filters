@@ -2,25 +2,54 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="binaray_project.cpp" />
-    <ClCompile Include="Hook\InlineHook.cpp" />
-    <ClCompile Include="Hook\ApiHook.cpp" />
-    <ClCompile Include="Injection\DllInjection.cpp" />
-    <ClCompile Include="Examples\HookExamples.cpp" />
-    <ClCompile Include="Examples\InjectionExamples.cpp" />
-    <ClCompile Include="Examples\MemoryExamples.cpp" />
-    <ClCompile Include="Memory\MemoryTools.cpp" />
+    <ClCompile Include="Hook\ApiHook.cpp">
+      <Filter>Hook</Filter>
+    </ClCompile>
+    <ClCompile Include="Hook\InlineHook.cpp">
+      <Filter>Hook</Filter>
+    </ClCompile>
+    <ClCompile Include="Injection\DllInjection.cpp">
+      <Filter>Injection</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory\MemoryTools.cpp">
+      <Filter>Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="Examples\MemoryExamples.cpp">
+      <Filter>Examples</Filter>
+    </ClCompile>
+    <ClCompile Include="Examples\HookExamples.cpp">
+      <Filter>Examples</Filter>
+    </ClCompile>
+    <ClCompile Include="Examples\InjectionExamples.cpp">
+      <Filter>Examples</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Hook">
       <UniqueIdentifier>{9b86e718-65cf-49a5-b858-bb6106835dcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Injection">
+      <UniqueIdentifier>{41ee7e29-7e96-4e6a-a444-56a98950c529}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Memory">
+      <UniqueIdentifier>{961f2fdd-4e27-4e64-a79b-872900ca6ff8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Examples">
+      <UniqueIdentifier>{38c9f2e5-6e2e-494d-aee5-94959a9ce678}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Hook\InlineHook.hpp">
       <Filter>Hook</Filter>
     </ClInclude>
-    <ClInclude Include="Hook\ApiHook.hpp" />
-    <ClInclude Include="Injection\DllInjection.hpp" />
-    <ClInclude Include="Memory\MemoryTools.hpp" />
+    <ClInclude Include="Hook\ApiHook.hpp">
+      <Filter>Hook</Filter>
+    </ClInclude>
+    <ClInclude Include="Injection\DllInjection.hpp">
+      <Filter>Injection</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory\MemoryTools.hpp">
+      <Filter>Memory</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
