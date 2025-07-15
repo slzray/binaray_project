@@ -83,6 +83,10 @@ bool DllInjector::InjectByCreateRemoteThread(const std::string& dllPath) {
     
     // 3. 获取LoadLibraryA地址
     HMODULE kernel32 = GetModuleHandleA("kernel32.dll");
+    if (!kernel32) {
+        return false;
+    }
+
     FARPROC loadLibraryAddr = GetProcAddress(kernel32, "LoadLibraryA");
     
     if (!loadLibraryAddr) {
@@ -352,8 +356,14 @@ bool DllInjector::EjectDll(const std::wstring& dllName) {
     if (!hMod) {
         return false;
     }
+
+    // 获取FreeLibrary地址
+    HMODULE kernel32 = GetModuleHandleA("kernel32.dll");
+    if (!kernel32) {
+        return false;
+    }
     
-    FARPROC freeLibraryAddr = GetProcAddress(GetModuleHandleA("kernel32.dll"), "FreeLibrary");
+    FARPROC freeLibraryAddr = GetProcAddress(kernel32, "FreeLibrary");
     if (!freeLibraryAddr) {
         return false;
     }

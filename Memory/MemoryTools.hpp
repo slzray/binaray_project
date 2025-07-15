@@ -15,19 +15,19 @@
 
 // 内存区域信息
 struct MemoryRegion {
-    LPVOID baseAddress;
-    SIZE_T size;
-    DWORD protect;
-    DWORD state;
-    DWORD type;
+    LPVOID baseAddress{ nullptr };
+    SIZE_T size{ 0 };
+    DWORD protect{ 0 };
+    DWORD state{ 0 };
+    DWORD type{ 0 };
     std::string moduleName;
 };
 
 // 搜索结果
 struct SearchResult {
-    LPVOID address;
+    LPVOID address{nullptr};
     std::vector<BYTE> data;
-    SIZE_T offset;
+    SIZE_T offset{0};
 };
 
 // 内存操作工具类
@@ -60,11 +60,6 @@ public:
     // 字符串读写
     std::string ReadString(LPVOID address, SIZE_T maxLength = 256, bool isUnicode = false);
     bool WriteString(LPVOID address, const std::string& str, bool isUnicode = false);
-    
-    // 内存分配和释放
-    LPVOID AllocateMemory(SIZE_T size, DWORD allocationType = MEM_COMMIT | MEM_RESERVE, 
-                         DWORD protect = PAGE_READWRITE);
-    bool FreeMemory(LPVOID address, SIZE_T size = 0, DWORD freeType = MEM_RELEASE);
     
     // 内存保护修改
     bool ChangeProtection(LPVOID address, SIZE_T size, DWORD newProtect, DWORD* oldProtect = nullptr);
@@ -115,10 +110,10 @@ public:
     // 段信息结构
     struct SectionInfo {
         std::string name;
-        LPVOID baseAddress;
-        SIZE_T virtualSize;
-        SIZE_T rawSize;
-        DWORD characteristics;
+        LPVOID baseAddress{nullptr};
+        SIZE_T virtualSize{0};
+        SIZE_T rawSize{0};
+        DWORD characteristics{0};
     };
 
     // 获取模块的段信息
@@ -187,8 +182,8 @@ private:
 class MemoryWatcher {
 private:
     struct WatchPoint {
-        LPVOID address;
-        SIZE_T size;
+        LPVOID address{nullptr};
+        SIZE_T size{0};
         std::vector<BYTE> lastValue;
         std::function<void(LPVOID, const std::vector<BYTE>&, const std::vector<BYTE>&)> callback;
     };

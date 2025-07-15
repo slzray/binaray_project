@@ -25,9 +25,9 @@ enum class HookType {
 class IATHook {
 private:
     struct HookInfo {
-        void* originalFunction;
-        void* hookFunction;
-        void** iatEntry;
+        void* originalFunction{nullptr};
+        void* hookFunction{ nullptr };
+        void** iatEntry{ nullptr };
         std::string moduleName;
         std::string functionName;
     };
@@ -103,11 +103,11 @@ private:
     EATHook m_eatHook;
     
     struct HookRecord {
-        HookType type;
+        HookType type{ HookType::INLINE_HOOK };
         std::string moduleName;
         std::string functionName;
-        void* hookFunction;
-        void* originalFunction;
+        void* hookFunction{ nullptr };
+        void* originalFunction{ nullptr };
     };
     
     std::vector<HookRecord> m_hookRecords;

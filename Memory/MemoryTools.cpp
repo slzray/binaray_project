@@ -134,22 +134,6 @@ bool MemoryTools::WriteString(LPVOID address, const std::string& str, bool isUni
     }
 }
 
-LPVOID MemoryTools::AllocateMemory(SIZE_T size, DWORD allocationType, DWORD protect) {
-    if (!IsValidProcess() || size == 0) {
-        return nullptr;
-    }
-    
-    return VirtualAllocEx(m_processHandle, nullptr, size, allocationType, protect);
-}
-
-bool MemoryTools::FreeMemory(LPVOID address, SIZE_T size, DWORD freeType) {
-    if (!IsValidProcess() || !address) {
-        return false;
-    }
-    
-    return VirtualFreeEx(m_processHandle, address, size, freeType) != 0;
-}
-
 bool MemoryTools::ChangeProtection(LPVOID address, SIZE_T size, DWORD newProtect, DWORD* oldProtect) {
     if (!IsValidProcess() || !address || size == 0) {
         return false;
